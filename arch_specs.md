@@ -23,6 +23,13 @@ Special registers:
  - RIP(Instruction pointer)
  - RFLAGS(CPU Flags)
  - RVMM(VMM table pointer)
+ - RIDT(IDT Pointer)
+
+On reset, cpu should set registers to:
+ - r0-r9, RAX, RBX, RBP to 0
+ - RSP, RIP, RFLAGS, RVMM, RIDT to 0
+
+btw cpu execution starts at 0
 
 ## Opcode encoding
 
@@ -60,7 +67,8 @@ If opcode has operands, read operands
    - If value is 1, pointer's data is 2 bytes long(16 bit)
    - If value is 2, pointer's data is 4 bytes long(32 bit)
    - If value is 3, pointer's data is 8 bytes long(64 bit)
- - bit 6-8: reserved
+ - bit 6: is value signed?
+ - bit 7-8: reserved
 
 ## Opcodes
 
@@ -118,5 +126,34 @@ If opcode has operands, read operands
 # RET
  - Encoded: 0x0b(ret)
  - Substracts from rsp 8, and then gets return address, then, it jumps to it
+
+# AND (what), (what2)
+ - Encoded: 0x0c(and) 0x00(flags_1) 0x00(data, length defined by flag) 0x00(flags_2) 0x00(data, length defined by flag)
+ - just does what=what&what2, simple.
+
+# OR (what), (what2)
+ - Encoded: 0x0d(or) 0x00(flags_1) 0x00(data, length defined by flag) 0x00(flags_2) 0x00(data, length defined by flag)
+ - just does what=what|what2, simple.
+
+# XOR (what), (what2)
+ - Encoded: 0x0e(xor) 0x00(flags_1) 0x00(data, length defined by flag) 0x00(flags_2) 0x00(data, length defined by flag)
+ - Just does what=what^what2, simple.
+
+# STOP
+ - Encoded: 0x0f(stop)
+ - Stops cpu execution(ONLY IN EMULATOR), real cpu should reset, emulator should stop
+
+# MOV (to), (val)
+ - Encoded: 0x10(mov) 0x00(flags_1) 0x00(data, length defined by flag) 0x00(flags_2) 0x00(data, length defined by flag)
+ - Sets (to) to (val)
+
+## IDT
+
+# Structure
+
+IDT Contains:
+ - 0-8 bytes: addr of idt handler(64 bit)
+ - 9: present
+ - 10-64 bytes: RESERVED
 
 thats all, i think...
